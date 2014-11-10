@@ -1,4 +1,4 @@
-defmodule Tests.Api do
+defmodule ApiTests do
   use ExUnit.Case
   use Elixilorem
 

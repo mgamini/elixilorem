@@ -1,0 +1,14 @@
+/log
+/deps
+/ebin
+/docs
+_build
+_rel
+/pkg
+.DS_Store
+.vagrant
+*.dump
+*.box
+_elixir
+tubes.sublime-workspace
+npm-debug.log
