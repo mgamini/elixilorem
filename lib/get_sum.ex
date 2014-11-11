@@ -1,19 +1,75 @@
 defmodule Elixilorem.GetSum do
-  alias Elixilorem.GetSum.Generator, as: Gen
 
-  def paragraph(), do: paragraphs
-  def paragraphs(count \\ 1), do: _block(:paragraphs, count)
-  def paragraphs(count, %{flavor: flavor}), do: _block(:paragraphs, count, %{flavor: flavor, format: nil})
+  @def_ipsum_path Application.get_env(:elixilorem, :ipsum_path, "_build/dev/lib/elixilorem/priv/ipsums")
+  @def_extension Application.get_env(:elixilorem, :extension, ".txt")
+  @def_flavor Application.get_env(:elixilorem, :flavor, "lorem_ipsum")
+  @def_format Application.get_env(:elixilorem, :format, "text")
+  @def_joins Application.get_env(:elixilorem, :joins, [paragraphs: "\n", sentences: ". ", words: " "])
 
-  def sentence(), do: sentences
-  def sentences(count \\ 1), do: _block(:sentences, count)
-  def sentences(count, %{flavor: flavor}), do: _block(:sentences, count, %{flavor: flavor, format: nil})
+  def get_block_sequence(type, count, %{flavor: flavor, format: nil}) do
+    list = get_sum_file(flavor) |> strip(type) |> String.split(@def_joins[type], trim: true)
+    length = length(list)
 
-  def word(), do: words
-  def words(count \\ 1), do: _block(:words, count)
-  def words(count, %{flavor: flavor}), do: _block(:words, count, %{flavor: flavor, format: nil})
+    gen_sequence({list, count, type}, :random.uniform(length), length, [])
+  end
 
-  defp _block(type, count, params \\ %{flavor: nil, format: nil}), do:
-    Gen.get_block_sequence(type, count, params)
+  #
+  # Private parts
+  #
+
+  defp get_sum_file(nil), do: get_sum_file(@def_flavor)
+  defp get_sum_file(name) do
+    try do
+      build_sum_filepath(name) |> File.read! |> String.strip
+    rescue error ->
+      {:error, error}
+    end
+  end
+
+  defp build_sum_filepath(name), do: File.cwd!() <> @def_ipsum_path <> name <> @def_extension
+
+  #
+  # "Why all this noise? Just return random paragraphs," my hypercritical inner voice says.
+  # "No, inner voice. With short input texts, the probability is high that paragraphs will
+  # repeat, and that's gross. Besides, YOU AREN'T MY REAL DAD." - Me
+  #
+
+  defp gen_sequence({list, count, type}, idx, max, out) do
+    if idx > max, do: idx = 1
+
+    if length(out) < count do
+      gen_sequence({list, count, type}, idx + 1, max, out ++ [:lists.nth(idx, list) |> String.strip])
+    else
+      gen_sequence({:ok, out, type})
+    end
+  end
+
+  defp gen_sequence({:ok, list, :sentences}) do
+    str = Enum.join(list, @def_joins[:sentences])
+    str <> @def_joins[:sentences] |> String.strip
+  end
+  defp gen_sequence({:ok, list, joiner}), do: Enum.join(list, @def_joins[joiner]) |> String.strip |> String.capitalize
+
+  defp strip(str, :paragraphs), do: str
+  defp strip(str, :sentences), do: str |> strip_paragraphs |> make_sentence
+  defp strip(str, :words), do: str |> strip_paragraphs |> strip_sentences |> make_words
+
+  defp strip_paragraphs(str), do: str |> String.replace(@def_joins[:paragraphs], " ") |> String.replace("  ", " ")
+  defp strip_sentences(str) do
+    sentence_join = @def_joins[:sentences] |> String.strip
+    str |> String.replace(sentence_join, " ") |> String.replace("  ", " ")
+  end
+
+  defp make_sentence(str) do
+    str = String.strip(str)
+
+    if String.ends_with?(str, ".") do
+      str <> @def_joins[:words]
+    else
+      str <> @def_joins[:sentences]
+    end
+  end
+
+  defp make_words(str), do: str |> String.replace(~r/\W/, " ") |> String.replace(~r/\s+/, " ")
 
 end

@@ -1,6 +1,6 @@
 defmodule ApiTests do
   use ExUnit.Case
-  alias Elixilorem.GetSum, as: GS
+  alias Elixilorem, as: GS
 
   @test_flavor "_test"
   @def_joins Application.get_env(:elixilorem, :joins)
@@ -64,7 +64,6 @@ defmodule ApiTests do
     assert is_binary(pg)
     assert String.split(pg, @def_joins[:words]) |> length == count
 
-    IO.puts pg
     assert String.match?(pg, ~r/[^0-9a-zA-Z ]/) == false
   end
 
