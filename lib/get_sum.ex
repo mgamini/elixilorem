@@ -1,6 +1,6 @@
 defmodule Elixilorem.GetSum do
 
-  @def_ipsum_path Application.get_env(:elixilorem, :ipsum_path, "priv/ipsums/")
+  @def_ipsum_path to_string(:code.priv_dir(:elixilorem)) <> Application.get_env(:elixilorem, :ipsum_path, "/ipsums/")
   @def_extension Application.get_env(:elixilorem, :extension, ".txt")
   @def_flavor Application.get_env(:elixilorem, :flavor, "lorem_ipsum")
   @def_format Application.get_env(:elixilorem, :format, "text")
