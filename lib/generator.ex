@@ -1,25 +1,16 @@
 defmodule Elixilorem.GetSum.Generator do
-  use Application
-
   @ipsum_path "/priv/ipsums/"
-  @paragraph_join "\n"
-  @sentence_join "."
-  @word_join " "
 
+  @def_extension Application.get_env(:elixilorem, :extension)
   @def_flavor Application.get_env(:elixilorem, :flavor)
   @def_format Application.get_env(:elixilorem, :format)
+  @def_joins Application.get_env(:elixilorem, :joins)
 
-  def get_block_sequence(type, count, %{flavor: flavor, format: format} = params) do
-    case type do
-      :paragraphs -> splitter = @paragraph_join
-      :sentences -> splitter = @sentence_join
-      :words -> splitter = @word_join
-    end
-
-    list = get_sum_file(flavor) |> String.split(splitter, trim: true)
+  def get_block_sequence(type, count, %{flavor: flavor, format: format}) do
+    list = get_sum_file(flavor) |> strip(type) |> String.split(@def_joins[type], trim: true)
     length = length(list)
 
-    gen_sequence({list, count, splitter}, :random.uniform(length), length, [])
+    gen_sequence({list, count, type}, :random.uniform(length), length, [])
   end
 
   #
@@ -35,7 +26,7 @@ defmodule Elixilorem.GetSum.Generator do
     end
   end
 
-  defp build_sum_filepath(name), do: File.cwd!() <> @ipsum_path <> name <> ".txt"
+  defp build_sum_filepath(name), do: File.cwd!() <> @ipsum_path <> name <> @def_extension
 
   #
   # "Why all this noise? Just return random paragraphs," my hypercritical inner voice says.
@@ -43,21 +34,42 @@ defmodule Elixilorem.GetSum.Generator do
   # repeat, and that's gross. Besides, YOU AREN'T MY REAL DAD." - Me
   #
 
-  defp gen_sequence({list, count, joiner}, idx, max, out) do
-    # IO.puts "args: #{count} = #{joiner} - #{idx} -  #{max} -  #{out}"
+  defp gen_sequence({list, count, type}, idx, max, out) do
     if idx > max, do: idx = 1
 
     if length(out) < count do
-      gen_sequence({list, count, joiner}, idx + 1, max, out ++ [:lists.nth(idx, list)])
+      gen_sequence({list, count, type}, idx + 1, max, out ++ [:lists.nth(idx, list) |> String.strip])
     else
-      gen_sequence({:ok, out, joiner})
+      gen_sequence({:ok, out, type})
     end
   end
 
-  defp gen_sequence({:ok, list, joiner}), do: Enum.join(list, joiner)
+  defp gen_sequence({:ok, list, :sentences}) do
+    str = Enum.join(list, @def_joins[:sentences])
+    str = str <> @def_joins[:sentences] |> String.strip
+  end
+  defp gen_sequence({:ok, list, joiner}), do: Enum.join(list, @def_joins[joiner]) |> String.strip |> String.capitalize
+
+  defp strip(str, :paragraphs), do: str
+  defp strip(str, :sentences), do: str |> strip_paragraphs |> make_sentence
+  defp strip(str, :words), do: str |> strip_paragraphs |> strip_sentences |> make_words
+
+  defp strip_paragraphs(str), do: str |> String.replace(@def_joins[:paragraphs], " ") |> String.replace("  ", " ")
+  defp strip_sentences(str) do
+    sentence_join = @def_joins[:sentences] |> String.strip
+    str |> String.replace(sentence_join, " ") |> String.replace("  ", " ")
+  end
+
+  defp make_sentence(str) do
+    str = String.strip(str)
+
+    if String.ends_with?(str, ".") do
+      str <> @def_joins[:words]
+    else
+      str <> @def_joins[:sentences]
+    end
+  end
+
+  defp make_words(str), do: str |> String.replace(~r/\W/, " ") |> String.replace(~r/\s+/, " ")
 
 end
-
-
-# alias Elixilorem.GetSum.Generator, as: G
-# G.get_block_sequence :paragraphs, 3, %{flavor: "test", format: nil}
