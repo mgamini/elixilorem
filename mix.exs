@@ -20,7 +20,7 @@ defmodule Elixilorem.Mixfile do
     ]]
 
   defp package do
-    [ files: ["lib", "mix.exs", "README.md"],
+    [ files: ~w(lib priv mix.exs README.md LICENSE.md),
       contributors: ["Garrett Amini"],
       licenses: ["MIT"],
       links: %{ "Github": "https://github.com/mgamini/elixilorem"} ]
