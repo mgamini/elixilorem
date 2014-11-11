@@ -1,24 +1,29 @@
 defmodule Elixilorem.GetSum do
 
-  @def_ipsum_path Application.get_env(:elixilorem, :ipsum_path, "_build/dev/lib/elixilorem/priv/ipsums")
+  @def_ipsum_path Application.get_env(:elixilorem, :ipsum_path, "priv/ipsums/")
   @def_extension Application.get_env(:elixilorem, :extension, ".txt")
   @def_flavor Application.get_env(:elixilorem, :flavor, "lorem_ipsum")
   @def_format Application.get_env(:elixilorem, :format, "text")
   @def_joins Application.get_env(:elixilorem, :joins, [paragraphs: "\n", sentences: ". ", words: " "])
 
   def get_block_sequence(type, count, %{flavor: flavor, format: nil}) do
-    list = get_sum_file(flavor) |> strip(type) |> String.split(@def_joins[type], trim: true)
-    length = length(list)
+    case get_sum_file(flavor) do
+      {:error, error} -> error
+      str ->
+        list = str |> strip(type) |> String.split(@def_joins[type], trim: true)
+        list = get_sum_file(flavor) |> strip(type) |> String.split(@def_joins[type], trim: true)
+        length = length(list)
 
-    gen_sequence({list, count, type}, :random.uniform(length), length, [])
+        gen_sequence({list, count, type}, :random.uniform(length), length, [])
+    end
   end
 
   #
   # Private parts
   #
 
-  defp get_sum_file(nil), do: get_sum_file(@def_flavor)
-  defp get_sum_file(name) do
+  def get_sum_file(nil), do: get_sum_file(@def_flavor)
+  def get_sum_file(name) do
     try do
       build_sum_filepath(name) |> File.read! |> String.strip
     rescue error ->
@@ -26,7 +31,7 @@ defmodule Elixilorem.GetSum do
     end
   end
 
-  defp build_sum_filepath(name), do: File.cwd!() <> @def_ipsum_path <> name <> @def_extension
+  def build_sum_filepath(name), do: @def_ipsum_path <> name <> @def_extension
 
   #
   # "Why all this noise? Just return random paragraphs," my hypercritical inner voice says.
