@@ -1,10 +1,10 @@
 defmodule Elixilorem.GetSum.Generator do
   @ipsum_path "/priv/ipsums/"
 
-  @def_extension Application.get_env(:elixilorem, :extension)
-  @def_flavor Application.get_env(:elixilorem, :flavor)
-  @def_format Application.get_env(:elixilorem, :format)
-  @def_joins Application.get_env(:elixilorem, :joins)
+  @def_extension Application.get_env(:elixilorem, :extension, ".txt")
+  @def_flavor Application.get_env(:elixilorem, :flavor, "lorem_ipsum")
+  @def_format Application.get_env(:elixilorem, :format, "text")
+  @def_joins Application.get_env(:elixilorem, :joins, [paragraphs: "\n", sentences: ". ", words: " "])
 
   def get_block_sequence(type, count, %{flavor: flavor, format: nil}) do
     list = get_sum_file(flavor) |> strip(type) |> String.split(@def_joins[type], trim: true)
