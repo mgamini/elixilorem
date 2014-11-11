@@ -49,11 +49,12 @@ defmodule Elixilorem.GetSum do
     end
   end
 
+  defp gen_sequence({:ok, list, :paragraphs}), do: Enum.join(list, @def_joins[:paragraphs]) |> String.strip
   defp gen_sequence({:ok, list, :sentences}) do
     str = Enum.join(list, @def_joins[:sentences])
     str <> @def_joins[:sentences] |> String.strip
   end
-  defp gen_sequence({:ok, list, joiner}), do: Enum.join(list, @def_joins[joiner]) |> String.strip |> String.capitalize
+  defp gen_sequence({:ok, list, :words}), do: Enum.join(list, @def_joins[:words]) |> String.strip |> String.capitalize
 
   defp strip(str, :paragraphs), do: str
   defp strip(str, :sentences), do: str |> strip_paragraphs |> make_sentence
