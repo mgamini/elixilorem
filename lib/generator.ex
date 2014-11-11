@@ -6,7 +6,7 @@ defmodule Elixilorem.GetSum.Generator do
   @def_format Application.get_env(:elixilorem, :format)
   @def_joins Application.get_env(:elixilorem, :joins)
 
-  def get_block_sequence(type, count, %{flavor: flavor, format: format}) do
+  def get_block_sequence(type, count, %{flavor: flavor, format: nil}) do
     list = get_sum_file(flavor) |> strip(type) |> String.split(@def_joins[type], trim: true)
     length = length(list)
 
@@ -46,7 +46,7 @@ defmodule Elixilorem.GetSum.Generator do
 
   defp gen_sequence({:ok, list, :sentences}) do
     str = Enum.join(list, @def_joins[:sentences])
-    str = str <> @def_joins[:sentences] |> String.strip
+    str <> @def_joins[:sentences] |> String.strip
   end
   defp gen_sequence({:ok, list, joiner}), do: Enum.join(list, @def_joins[joiner]) |> String.strip |> String.capitalize
 

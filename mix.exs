@@ -10,7 +10,14 @@ defmodule Elixilorem.Mixfile do
       deps: [] ]
   end
 
-  def application, do: []
+  def application, do:
+    [env: [
+  extension: ".txt",
+  flavors: ["lorem_ipsum", "iliad", "frankenstein", "lorem_ipsum", "riker", "cat"],
+  flavor: "lorem_ipsum",
+  format: "text",
+  joins: [paragraphs: "\n", sentences: ". ", words: " "]
+    ]]
 
   defp package do
     [ files: ["lib", "mix.exs", "README.md"],
