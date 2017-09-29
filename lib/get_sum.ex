@@ -1,10 +1,13 @@
 defmodule Elixilorem.GetSum do
 
-  @def_ipsum_path to_string(:code.priv_dir(:elixilorem)) <> Application.get_env(:elixilorem, :ipsum_path, "/ipsums/")
   @def_extension Application.get_env(:elixilorem, :extension, ".txt")
   @def_flavor Application.get_env(:elixilorem, :flavor, "lorem_ipsum")
   @def_format Application.get_env(:elixilorem, :format, "text")
   @def_joins Application.get_env(:elixilorem, :joins, [paragraphs: "\n", sentences: ". ", words: " "])
+
+  def def_ipsum_path do
+    to_string(:code.priv_dir(:elixilorem)) <> Application.get_env(:elixilorem, :ipsum_path, "/ipsums/")
+  end
 
   def get_block_sequence(type, count, %{flavor: flavor, format: nil}) do
     case get_sum_file(flavor) do
@@ -31,7 +34,7 @@ defmodule Elixilorem.GetSum do
     end
   end
 
-  def build_sum_filepath(name), do: @def_ipsum_path <> name <> @def_extension
+  def build_sum_filepath(name), do: def_ipsum_path <> name <> @def_extension
 
   #
   # "Why all this noise? Just return random paragraphs," my hypercritical inner voice says.
